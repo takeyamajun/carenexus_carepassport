@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CareNexus | Prototype v2</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', '"Noto Sans JP"', 'system-ui', 'sans-serif'],
+        num:  ['Fraunces', 'Georgia', 'serif'],
+      },
+      colors: {
+        bg: '#F7F7F5',
+        surface: '#FFFFFF',
+        ink: { 900:'#1A1A1A', 600:'#5C5C5C', 400:'#9A9A9A', 200:'#E8E8E6', 50:'#F2F2F0' },
+        brand: { DEFAULT:'#15506B', dark:'#0E3C50', soft:'#EAF1F4' },
+        positive: { DEFAULT:'#2F7A55', soft:'#E8F2EC' },
+        gold: { DEFAULT:'#A8772E', soft:'#F6EEDF' },
+      },
+      borderRadius: { '2xl':'1rem', '3xl':'1.5rem' },
+    },
+  },
+};
+</script>
+
+<style>
+  html,body{font-family:'Plus Jakarta Sans','Noto Sans JP',system-ui,sans-serif;background:#E5E5E2;color:#1A1A1A;-webkit-font-smoothing:antialiased;}
+  .font-num{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fade{animation:fadeUp .4s cubic-bezier(.2,.7,.2,1) both;}
+  .d0{animation-delay:0ms;}.d1{animation-delay:50ms;}.d2{animation-delay:110ms;}.d3{animation-delay:180ms;}.d4{animation-delay:260ms;}.d5{animation-delay:340ms;}
+  *::-webkit-scrollbar{width:0;height:0;}
+  *:focus-visible{outline:2px solid #15506B;outline-offset:2px;border-radius:6px;}
+  .no-tap{-webkit-tap-highlight-color:transparent;}
+  /* phone frame */
+  .phone{width:412px;max-width:100%;height:860px;background:#F7F7F5;border-radius:38px;overflow:hidden;position:relative;box-shadow:0 24px 60px -12px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.04);}
+  .scroll{height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ---------- icons (heroicons outline, 1.6) ---------- */
+const S = ({d, className='w-6 h-6', fill='none'}) => (
+  <svg className={className} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">{d}</svg>
+);
+const Icon = {
+  home:    (p)=><S {...p} d={<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/>} />,
+  card:    (p)=><S {...p} d={<path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>} />,
+  pen:     (p)=><S {...p} d={<path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.862 4.487zm0 0L19.5 7.125"/>} />,
+  badge:   (p)=><S {...p} d={<path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>} />,
+  bell:    (p)=><S {...p} d={<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>} />,
+  arrowR:  (p)=><S {...p} d={<path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>} />,
+  arrowL:  (p)=><S {...p} d={<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>} />,
+  chev:    (p)=><S {...p} d={<path d="M8.25 4.5l7.5 7.5-7.5 7.5"/>} />,
+  check:   (p)=><S {...p} d={<path d="M4.5 12.75l6 6 9-13.5"/>} />,
+  up:      (p)=><S {...p} d={<path d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.281m5.94 2.281l-2.28 5.941"/>} />,
+  spark:   (p)=><S {...p} d={<path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>} />,
+  clock:   (p)=><S {...p} d={<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>} />,
+  search:  (p)=><S {...p} d={<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>} />,
+  send:    (p)=><S {...p} d={<path d="M6 12L3.269 3.125A59.769 59.769 0 0121.485 12 59.768 59.768 0 013.27 20.875L5.999 12zm0 0h7.5"/>} />,
+  filter:  (p)=><S {...p} d={<path d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/>} />,
+  user:    (p)=><S {...p} d={<path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>} />,
+  dot:     (p)=><S {...p} fill="currentColor" d={<circle cx="12" cy="12" r="4"/>} />,
+};
+
+/* ---------- atoms ---------- */
+const Card = ({className='',children,onClick}) => (
+  <div onClick={onClick} className={`bg-surface border border-ink-200 rounded-2xl ${onClick?'cursor-pointer active:bg-ink-50 transition-colors no-tap':''} ${className}`}>{children}</div>
+);
+
+const CTA = ({children, onClick, disabled, tone='brand'}) => {
+  const tones={brand:'bg-brand text-white active:bg-brand-dark', gold:'bg-gold text-white', light:'bg-white text-brand border border-ink-200 active:bg-ink-50'};
+  return (
+    <button onClick={onClick} disabled={disabled}
+      className={`w-full rounded-full py-4 text-[15px] font-semibold transition-colors no-tap flex items-center justify-center gap-2 ${tones[tone]} ${disabled?'opacity-40':''}`}>
+      {children}
+    </button>
+  );
+};
+
+const Bar = ({val, tone='brand'}) => {
+  const c = tone==='positive'?'bg-positive':tone==='gold'?'bg-gold':'bg-brand';
+  return (
+    <div className="h-1.5 bg-ink-100 rounded-full overflow-hidden" style={{background:'#EFEFED'}}>
+      <div className={`h-full rounded-full ${c}`} style={{width:`${val}%`}} />
+    </div>
+  );
+};
+
+const TopBar = ({title, right}) => (
+  <div className="sticky top-0 z-20 bg-bg/90 backdrop-blur px-5 pt-3 pb-3 flex items-center justify-between border-b border-ink-200/60">
+    <span className="text-[17px] font-bold text-ink-900">{title}</span>
+    {right}
+  </div>
+);
+
+/* ============================================================
+   HOME — habit hook: "今日のあなたの変化"
+   ============================================================ */
+const Home = ({go}) => (
+  <div className="scroll pb-28">
+    <TopBar title="ホーム" right={
+      <button className="relative no-tap"><Icon.bell className="w-6 h-6 text-ink-600"/><span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-gold rounded-full"/></button>
+    }/>
+
+    <div className="px-5 pt-4">
+      {/* greeting */}
+      <div className="fade d0 mb-5">
+        <p className="text-[13px] text-ink-400">5月28日 火曜</p>
+        <h1 className="text-[22px] font-bold text-ink-900 leading-snug mt-0.5">おかえりなさい、花子さん</h1>
+      </div>
+
+      {/* hero: change since last visit (the habit-forming card) */}
+      <Card className="fade d1 p-5 mb-4 bg-brand text-white border-brand">
+        <div className="flex items-center gap-1.5 text-brand-soft/90 mb-3">
+          <Icon.up className="w-4 h-4"/>
+          <span className="text-[12px] font-medium tracking-wide">前回からの変化</span>
+        </div>
+        <div className="flex items-end gap-4">
+          <div>
+            <p className="text-[12px] text-white/70 mb-0.5">在宅レディネス</p>
+            <p className="font-num text-[52px] leading-none">72</p>
+          </div>
+          <div className="flex items-center gap-1 mb-2 bg-white/15 rounded-full px-2.5 py-1">
+            <Icon.up className="w-3.5 h-3.5"/>
+            <span className="text-[13px] font-semibold tnum">+4</span>
+          </div>
+        </div>
+        <p className="text-[13px] text-white/85 mt-3 leading-relaxed">
+          先月の急変対応の記録が評価に反映され、4ポイント上昇しました。Lv.A まであと 8 ポイントです。
+        </p>
+      </Card>
+
+      {/* single next action */}
+      <Card className="fade d2 p-4 mb-6" onClick={()=>go('record')}>
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-full bg-brand-soft flex items-center justify-center shrink-0">
+            <Icon.pen className="w-5 h-5 text-brand"/>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[15px] font-semibold text-ink-900">6月のリフレクション</p>
+            <p className="text-[13px] text-ink-400">あと7日・約30秒で完了します</p>
+          </div>
+          <Icon.chev className="w-4 h-4 text-ink-400 shrink-0"/>
+        </div>
+      </Card>
+
+      {/* timeline: "次に何が起きるか" — 看護roo式の安心導線 */}
+      <p className="fade d3 text-[12px] font-semibold text-ink-400 tracking-wide mb-3 px-1">あなたのこれから</p>
+      <div className="fade d3 relative pl-1">
+        {[
+          {t:'今', label:'毎月のリフレクションを継続', done:true, now:true},
+          {t:'+2ヶ月', label:'夜間自律判断の経験を記録', done:false},
+          {t:'Lv.A 到達', label:'トップステーションの限定求人が解放', done:false, gold:true},
+          {t:'その先', label:'メンターによる直接スカウト', done:false},
+        ].map((s,i,arr)=>(
+          <div key={i} className="flex gap-3.5 pb-5 last:pb-0 relative">
+            {i<arr.length-1 && <span className="absolute left-[10px] top-6 bottom-0 w-px bg-ink-200"/>}
+            <span className={`mt-0.5 w-[21px] h-[21px] rounded-full flex items-center justify-center shrink-0 z-10 ${s.now?'bg-brand':s.gold?'bg-gold-soft border border-gold':'bg-white border border-ink-200'}`}>
+              {s.now ? <Icon.dot className="w-2.5 h-2.5 text-white"/> : s.gold ? <Icon.badge className="w-3 h-3 text-gold"/> : <span className="w-1.5 h-1.5 rounded-full bg-ink-200"/>}
+            </span>
+            <div className="flex-1 -mt-0.5">
+              <p className={`text-[11px] font-semibold tracking-wide mb-0.5 ${s.gold?'text-gold':s.now?'text-brand':'text-ink-400'}`}>{s.t}</p>
+              <p className="text-[14px] text-ink-900 leading-snug">{s.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+/* ============================================================
+   PASSPORT — single focus: the ladder translation
+   ============================================================ */
+const Passport = ({goCred}) => {
+  const ward = [
+    {n:'急変時アセスメント', v:88},
+    {n:'継続的観察・記録', v:82},
+    {n:'多職種連携', v:76},
+    {n:'家族コミュニケーション', v:71},
+  ];
+  const home = [
+    {n:'在宅急変アセスメント', v:80},
+    {n:'自律的判断', v:72},
+    {n:'家族支援・調整', v:68},
+    {n:'医療処置（在宅）', v:64},
+  ];
+  return (
+    <div className="scroll pb-28">
+      <TopBar title="キャリアパスポート" right={<Icon.user className="w-6 h-6 text-ink-600"/>}/>
+      <div className="px-5 pt-4">
+
+        {/* the one hero: translation */}
+        <div className="fade d0 text-center mb-1">
+          <p className="text-[13px] text-ink-400">あなたの病棟経験を在宅看護に換算すると</p>
+        </div>
+        <Card className="fade d1 p-6 mb-5">
+          <div className="flex items-stretch justify-between gap-2">
+            {/* ward */}
+            <div className="flex-1 text-center">
+              <p className="text-[11px] text-ink-400 mb-1">病棟（現在）</p>
+              <p className="font-num text-[40px] leading-none text-ink-900">III</p>
+              <p className="text-[11px] text-ink-400 mt-1">クリニカルラダー</p>
+            </div>
+            {/* arrow */}
+            <div className="flex flex-col items-center justify-center px-1">
+              <div className="w-9 h-9 rounded-full border border-ink-200 flex items-center justify-center bg-bg">
+                <Icon.arrowR className="w-4 h-4 text-brand"/>
+              </div>
+            </div>
+            {/* home */}
+            <div className="flex-1 text-center">
+              <p className="text-[11px] text-gold mb-1">在宅レディネス</p>
+              <p className="font-num text-[40px] leading-none text-gold">B</p>
+              <p className="text-[11px] text-ink-400 mt-1"><span className="tnum">72</span> / 100</p>
+            </div>
+          </div>
+          <div className="mt-5 pt-4 border-t border-ink-200 flex items-center gap-2 justify-center">
+            <Icon.up className="w-4 h-4 text-positive"/>
+            <p className="text-[13px] text-ink-600">全国の訪問看護師で上位 <span className="font-semibold text-ink-900 tnum">34</span>%</p>
+          </div>
+        </Card>
+
+        {/* strengths — collapsed into clean list */}
+        <p className="fade d2 text-[12px] font-semibold text-ink-400 tracking-wide mb-2 px-1">在宅で活きる、あなたの強み</p>
+        <Card className="fade d2 mb-5 overflow-hidden">
+          {[
+            {t:'冷静な急変アセスメント', d:'消化器内科4年で、状態変化の徴候を早期に捉える力が育っています'},
+            {t:'継続観察と記録の質', d:'プライマリーナース歴2年が、長期視点の観察力につながっています'},
+            {t:'多職種との接続力', d:'ICUとの引き継ぎ経験が、在宅の連携場面で活きます'},
+          ].map((s,i,a)=>(
+            <div key={i} className={`flex gap-3 p-4 ${i<a.length-1?'border-b border-ink-200':''}`}>
+              <span className="w-6 h-6 rounded-full bg-positive-soft text-positive flex items-center justify-center shrink-0 mt-0.5">
+                <Icon.check className="w-3.5 h-3.5"/>
+              </span>
+              <div>
+                <p className="text-[14px] font-semibold text-ink-900 leading-snug">{s.t}</p>
+                <p className="text-[13px] text-ink-600 leading-relaxed mt-0.5">{s.d}</p>
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        {/* skill detail — two clean stacked groups, no cramped columns */}
+        <p className="fade d3 text-[12px] font-semibold text-ink-400 tracking-wide mb-2 px-1">スキル詳細</p>
+        <Card className="fade d3 p-4 mb-3">
+          <p className="text-[13px] font-semibold text-ink-900 mb-3">病棟で培ったスキル</p>
+          <div className="space-y-3">
+            {ward.map((s,i)=>(
+              <div key={i}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-[13px] text-ink-600">{s.n}</span>
+                  <span className="font-num text-[13px] text-ink-900 tnum">{s.v}</span>
+                </div>
+                <Bar val={s.v} tone="brand"/>
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card className="fade d4 p-4 mb-5">
+          <p className="text-[13px] font-semibold text-ink-900 mb-3">在宅で求められるスキル（換算後）</p>
+          <div className="space-y-3">
+            {home.map((s,i)=>(
+              <div key={i}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-[13px] text-ink-600">{s.n}</span>
+                  <span className="font-num text-[13px] text-gold tnum">{s.v}</span>
+                </div>
+                <Bar val={s.v} tone="gold"/>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* single CTA to credential */}
+        <div className="fade d5">
+          <CTA tone="light" onClick={goCred}>
+            <Icon.badge className="w-5 h-5"/>
+            レディネス資格を表示
+          </CTA>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   RECORD — one question at a time, 30-sec flow
+   ============================================================ */
+const Record = ({back}) => {
+  const total=5, step=3;
+  const [yn,setYn]=useState(null);
+  const [types,setTypes]=useState([]);
+  const [count,setCount]=useState('');
+  const [done,setDone]=useState(false);
+  const toggle=(t)=>setTypes(p=>p.includes(t)?p.filter(x=>x!==t):[...p,t]);
+  const valid = yn!==null && (yn===false || (types.length>0 && count));
+
+  if(done) return (
+    <div className="scroll">
+      <div className="h-full flex flex-col items-center justify-center px-8 text-center">
+        <div className="fade d0 w-16 h-16 rounded-full bg-positive-soft flex items-center justify-center mb-5">
+          <Icon.check className="w-8 h-8 text-positive"/>
+        </div>
+        <h1 className="fade d1 text-[22px] font-bold text-ink-900 leading-snug mb-2">今月の記録が完了しました</h1>
+        <p className="fade d2 text-[14px] text-ink-600 leading-relaxed mb-1">スコアに反映され、在宅レディネスが <span className="font-semibold text-positive tnum">+2</span> 上昇しました</p>
+        <p className="fade d2 text-[13px] text-ink-400 mb-8">山田メンターのコメントが24時間以内に届きます</p>
+        <div className="fade d3 w-full max-w-xs"><CTA onClick={back}>ホームに戻る</CTA></div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="scroll pb-28 flex flex-col h-full">
+      <TopBar title="6月のリフレクション" right={<span className="text-[13px] text-ink-400 tnum">{step}/{total}</span>}/>
+      {/* progress */}
+      <div className="px-5 pt-3">
+        <div className="h-1 rounded-full overflow-hidden" style={{background:'#EFEFED'}}>
+          <div className="h-full bg-brand transition-all duration-500" style={{width:`${step/total*100}%`}}/>
+        </div>
+      </div>
+
+      <div className="px-5 pt-7 flex-1">
+        {/* the single question */}
+        <div className="fade d0 mb-6">
+          <p className="text-[12px] font-semibold text-gold tracking-wide mb-2">質問 3</p>
+          <h2 className="text-[22px] font-bold text-ink-900 leading-snug">今月、急変時の対応はありましたか？</h2>
+          <p className="text-[13px] text-ink-400 mt-2">対象期間 5月1日〜5月31日</p>
+        </div>
+
+        {/* yes / no — big tap targets */}
+        <div className="fade d1 grid grid-cols-2 gap-3 mb-6">
+          {[{v:true,l:'あった'},{v:false,l:'なかった'}].map(o=>(
+            <button key={String(o.v)} onClick={()=>setYn(o.v)}
+              className={`py-7 rounded-2xl border text-[17px] font-semibold transition-colors no-tap ${yn===o.v?'bg-ink-900 text-white border-ink-900':'bg-white text-ink-600 border-ink-200 active:bg-ink-50'}`}>
+              {o.l}
+            </button>
+          ))}
+        </div>
+
+        {yn===true && (
+          <div className="fade d0 space-y-6">
+            <div>
+              <p className="text-[13px] font-semibold text-ink-900 mb-2.5">どんな急変でしたか？（複数選択可）</p>
+              <div className="flex flex-wrap gap-2">
+                {['呼吸不全','循環不全','意識障害','疼痛コントロール','その他'].map(t=>(
+                  <button key={t} onClick={()=>toggle(t)}
+                    className={`px-3.5 py-2.5 rounded-full text-[14px] border transition-colors no-tap flex items-center gap-1.5 ${types.includes(t)?'bg-brand text-white border-brand':'bg-white text-ink-600 border-ink-200 active:bg-ink-50'}`}>
+                    {types.includes(t)&&<Icon.check className="w-3.5 h-3.5"/>}{t}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-ink-900 mb-2.5">対応した回数は？</p>
+              <div className="grid grid-cols-4 gap-2">
+                {['1回','2〜3回','4〜6回','7回〜'].map(c=>(
+                  <button key={c} onClick={()=>setCount(c)}
+                    className={`py-3 rounded-xl border text-[14px] transition-colors no-tap ${count===c?'bg-ink-900 text-white border-ink-900':'bg-white text-ink-600 border-ink-200 active:bg-ink-50'}`}>{c}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* sticky single CTA */}
+      <div className="sticky bottom-0 px-5 py-4 bg-bg/90 backdrop-blur border-t border-ink-200">
+        <CTA onClick={()=>setDone(true)} disabled={!valid}>
+          {valid ? '記録して次へ' : '選択してください'}
+          {valid && <Icon.arrowR className="w-4 h-4"/>}
+        </CTA>
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   CREDENTIAL — clean certificate, single focus
+   ============================================================ */
+const Credential = ({back}) => (
+  <div className="scroll pb-28">
+    <TopBar title="レディネス資格" right={
+      <button className="text-brand no-tap"><Icon.send className="w-5 h-5"/></button>
+    }/>
+    <div className="px-5 pt-5">
+      <Card className="fade d0 overflow-hidden mb-5">
+        <div className="h-1 bg-gold"/>
+        <div className="p-7 text-center">
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-gold mb-5">CERTIFICATE OF READINESS</p>
+
+          <div className="inline-flex items-baseline gap-2.5 mb-1">
+            <span className="text-[12px] text-ink-400 tracking-wide">LEVEL</span>
+            <span className="font-num text-[88px] leading-none text-gold">B</span>
+          </div>
+          <p className="text-[13px] text-ink-400 mb-7"><span className="tnum">72</span> / 100 点</p>
+
+          <p className="text-[11px] tracking-wide text-ink-400 mb-1.5">この資格は次の方に授与されました</p>
+          <p className="text-[20px] font-bold text-ink-900 mb-1">田中 花子</p>
+          <p className="text-[13px] text-ink-400 mb-7">都内大学病院 消化器内科・経験4年</p>
+
+          <p className="text-[13px] text-ink-600 leading-relaxed border-t border-ink-200 pt-6">
+            慶應義塾大学看護医療学部および全国のトップ訪問看護ステーション経営者の監修のもと、所定のレディネス評価を満たしたことを認定します。
+          </p>
+        </div>
+
+        {/* meta strip */}
+        <div className="grid grid-cols-3 border-t border-ink-200 divide-x divide-ink-200">
+          {[{l:'認定日',v:'26.05.15'},{l:'認定ID',v:'CN-04127'},{l:'有効期限',v:'27.05.14'}].map((d,i)=>(
+            <div key={i} className="p-3 text-center">
+              <p className="text-[10px] text-ink-400 tracking-wide mb-0.5">{d.l}</p>
+              <p className="font-num text-[14px] text-ink-900 tnum">{d.v}</p>
+            </div>
+          ))}
+        </div>
+        <div className="h-1 bg-gold"/>
+      </Card>
+
+      {/* issuer trust line */}
+      <Card className="fade d1 p-4 mb-3">
+        <div className="flex items-center gap-3">
+          <span className="w-10 h-10 rounded-full bg-brand-soft flex items-center justify-center shrink-0">
+            <Icon.badge className="w-5 h-5 text-brand"/>
+          </span>
+          <div className="flex-1">
+            <p className="text-[14px] font-semibold text-ink-900">慶應義塾大学 共同認定</p>
+            <p className="text-[12px] text-ink-400">看護医療学部の学術監修にもとづく評価</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="fade d2 p-4 mb-5">
+        <div className="flex items-center gap-3">
+          <span className="w-10 h-10 rounded-full bg-ink-50 flex items-center justify-center shrink-0 font-semibold text-ink-600">YM</span>
+          <div className="flex-1">
+            <p className="text-[14px] font-semibold text-ink-900">認定メンター 山田 美咲</p>
+            <p className="text-[12px] text-ink-400">渋谷在宅看護ステーション 管理者</p>
+          </div>
+          <Icon.chev className="w-4 h-4 text-ink-400"/>
+        </div>
+      </Card>
+
+      <div className="fade d3"><CTA onClick={back} tone="light"><Icon.arrowL className="w-4 h-4"/>パスポートに戻る</CTA></div>
+    </div>
+  </div>
+);
+
+/* ============================================================
+   STATION (B side) — clean candidate list
+   ============================================================ */
+const Station = () => {
+  const [lv,setLv]=useState('B');
+  const cands=[
+    {id:'04127',a:'T.H',lv:'B',sc:72,age:28,h:'都内大学病院 消化器内科',y:4,tags:['プライマリーナース歴2年','急変対応 月4件'],avail:'3ヶ月以内'},
+    {id:'03298',a:'K.N',lv:'A',sc:88,age:34,h:'総合病院 ICU',y:7,tags:['ECMO管理','重症対応多数'],avail:'6ヶ月以内'},
+    {id:'04401',a:'S.M',lv:'B',sc:76,age:31,h:'がんセンター 緩和ケア',y:5,tags:['緩和ケア専従3年','看取り30件超'],avail:'即時'},
+    {id:'04582',a:'A.T',lv:'B',sc:74,age:29,h:'大学病院 呼吸器内科',y:5,tags:['在宅酸素療法','NPPV管理'],avail:'3ヶ月以内'},
+  ];
+  return (
+    <div className="scroll pb-28">
+      <TopBar title="候補者を探す" right={<span className="text-[12px] text-ink-400">渋谷ST</span>}/>
+
+      {/* search + count */}
+      <div className="px-5 pt-4">
+        <div className="fade d0 flex items-center gap-2 bg-white border border-ink-200 rounded-full px-4 py-3 mb-3">
+          <Icon.search className="w-4 h-4 text-ink-400 shrink-0"/>
+          <span className="text-[14px] text-ink-400">スキル・経験で検索</span>
+        </div>
+        {/* level filter — single row, clear */}
+        <div className="fade d0 flex items-center gap-2 mb-4">
+          <span className="text-[12px] text-ink-400 shrink-0">レディネス</span>
+          {['A','B','C'].map(x=>(
+            <button key={x} onClick={()=>setLv(x)}
+              className={`px-4 py-1.5 rounded-full text-[13px] font-semibold border transition-colors no-tap ${lv===x?'bg-ink-900 text-white border-ink-900':'bg-white text-ink-600 border-ink-200'}`}>
+              {x}以上
+            </button>
+          ))}
+          <button className="ml-auto shrink-0 w-9 h-9 rounded-full border border-ink-200 bg-white flex items-center justify-center"><Icon.filter className="w-4 h-4 text-ink-600"/></button>
+        </div>
+
+        <div className="fade d1 flex items-baseline justify-between mb-2 px-1">
+          <p className="text-[13px] text-ink-600"><span className="font-semibold text-ink-900 tnum">47</span> 名が条件に一致</p>
+          <span className="text-[12px] text-ink-400">スコア順</span>
+        </div>
+      </div>
+
+      {/* candidate cards — one per row, scannable */}
+      <div className="px-5 space-y-3">
+        {cands.map((c,i)=>(
+          <Card key={c.id} className={`fade d${Math.min(i+1,5)} p-4`} onClick={()=>{}}>
+            <div className="flex items-start gap-3.5">
+              {/* level badge */}
+              <div className="text-center shrink-0 w-12">
+                <p className={`font-num text-[34px] leading-none ${c.lv==='A'?'text-gold':'text-brand'}`}>{c.lv}</p>
+                <p className="font-num text-[11px] text-ink-400 tnum mt-0.5">{c.sc}</p>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[15px] font-semibold text-ink-900">候補者 {c.a}</p>
+                  <span className="text-[11px] text-ink-400">#{c.id}</span>
+                </div>
+                <p className="text-[12px] text-ink-600 mt-0.5">{c.age}歳・{c.h}・{c.y}年</p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {c.tags.map(t=>(
+                    <span key={t} className="px-2 py-0.5 bg-ink-50 text-ink-600 text-[11px] rounded-md">{t}</span>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-[12px] text-ink-400">入職可能 <span className="text-ink-900 font-medium">{c.avail}</span></span>
+                  <button className="px-4 py-1.5 bg-brand text-white text-[12px] font-semibold rounded-full active:bg-brand-dark transition-colors no-tap flex items-center gap-1.5">
+                    スカウト<Icon.send className="w-3 h-3"/>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================
+   App shell with bottom tabs
+   ============================================================ */
+const TABS = [
+  {id:'home', label:'ホーム', icon:Icon.home},
+  {id:'passport', label:'パスポート', icon:Icon.card},
+  {id:'record', label:'記録', icon:Icon.pen},
+  {id:'credential', label:'資格', icon:Icon.badge},
+];
+
+const App = () => {
+  const [side,setSide]=useState('C'); // C or B
+  const [tab,setTab]=useState('home');
+  const [k,setK]=useState(0);
+  useEffect(()=>{setK(x=>x+1);},[tab,side]);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center py-8 px-4 gap-5">
+      {/* side switcher (demo control, outside phone) */}
+      <div className="flex items-center gap-1 bg-white rounded-full p-1 border border-ink-200">
+        <button onClick={()=>{setSide('C');setTab('home');}}
+          className={`px-5 py-2 rounded-full text-[13px] font-semibold transition-colors no-tap ${side==='C'?'bg-brand text-white':'text-ink-600'}`}>
+          看護師（C側）
+        </button>
+        <button onClick={()=>{setSide('B');}}
+          className={`px-5 py-2 rounded-full text-[13px] font-semibold transition-colors no-tap ${side==='B'?'bg-brand text-white':'text-ink-600'}`}>
+          ステーション（B側）
+        </button>
+      </div>
+
+      {/* phone */}
+      <div className="phone">
+        <div key={k} className="h-full flex flex-col">
+          {side==='B' ? <Station/> : (
+            <>
+              {tab==='home' && <Home go={setTab}/>}
+              {tab==='passport' && <Passport goCred={()=>setTab('credential')}/>}
+              {tab==='record' && <Record back={()=>setTab('home')}/>}
+              {tab==='credential' && <Credential back={()=>setTab('passport')}/>}
+            </>
+          )}
+        </div>
+
+        {/* bottom tab bar (C side only) */}
+        {side==='C' && (
+          <div className="absolute bottom-0 left-0 right-0 bg-surface/95 backdrop-blur border-t border-ink-200 flex items-stretch px-2 pt-1.5 pb-5">
+            {TABS.map(t=>{
+              const active = tab===t.id;
+              const IconC = t.icon;
+              return (
+                <button key={t.id} onClick={()=>setTab(t.id)}
+                  className="flex-1 flex flex-col items-center gap-0.5 py-1 no-tap">
+                  <IconC className={`w-6 h-6 ${active?'text-brand':'text-ink-400'}`}/>
+                  <span className={`text-[10px] font-medium ${active?'text-brand':'text-ink-400'}`}>{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <p className="text-[11px] text-ink-400 tracking-wide">CareNexus · Prototype v2 · {side==='C'?'看護師ビュー':'ステーションビュー'}</p>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
