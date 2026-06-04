@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareNexus — Career Passport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBFAF8; --bg-2:#F2F1ED; --card:#FFFFFF;
+  --navy:#0E2A47; --navy-soft:#1B3A5C;
+  --blue:#2D7FF9; --blue-soft:#EAF2FF;
+  --coral:#FF7A45; --coral-soft:#FFEFE7;
+  --green:#27B083; --green-soft:#E4F6EF;
+  --gold:#E0A93B;
+  --ink:#16202E; --muted:#6A7686; --line:#E9E6DF; --line-2:#EFEDE7;
+  --shadow:0 1px 2px rgba(14,42,71,.04),0 8px 24px rgba(14,42,71,.06);
+  --shadow-lg:0 12px 40px rgba(14,42,71,.14);
+  --r:16px; --r-sm:11px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.7;overflow:hidden;
+}
+.font-d{font-family:"Zen Kaku Gothic New",sans-serif}
+.num{font-family:"Outfit",sans-serif;font-feature-settings:"tnum"}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#d9d6cf;border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- Layout ---------- */
+.app{display:flex;height:100vh}
+.sidebar{
+  width:248px;flex-shrink:0;background:var(--navy);color:#fff;
+  display:flex;flex-direction:column;padding:22px 16px;
+  background-image:radial-gradient(120% 60% at 0% 0%,#16365a 0%,transparent 60%);
+}
+.brand{display:flex;align-items:center;gap:11px;padding:6px 8px 22px}
+.brand .mark{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(140deg,var(--blue),#5fa0ff);
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Outfit";font-weight:800;font-size:18px;color:#fff;
+  box-shadow:0 6px 16px rgba(45,127,249,.4);
+}
+.brand .name{font-family:"Outfit";font-weight:700;font-size:19px;letter-spacing:.3px}
+.brand .tag{font-size:10px;color:#8fa6c4;letter-spacing:1.5px;font-family:"Outfit";font-weight:500}
+.nav{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.nav-label{font-size:10.5px;letter-spacing:1.4px;color:#6f88a8;padding:12px 12px 7px;font-weight:700}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;
+  color:#c3d2e6;font-size:14px;font-weight:500;cursor:pointer;
+  transition:background .18s,color .18s,transform .12s;position:relative;
+}
+.nav-item svg{width:19px;height:19px;flex-shrink:0;stroke:#9fb4d0;transition:stroke .18s}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item:hover svg{stroke:#fff}
+.nav-item.active{background:rgba(45,127,249,.18);color:#fff}
+.nav-item.active svg{stroke:#fff}
+.nav-item.active::before{content:"";position:absolute;left:-16px;top:9px;bottom:9px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-badge{margin-left:auto;background:var(--coral);color:#fff;font-size:10.5px;font-family:"Outfit";font-weight:700;
+  padding:1px 7px;border-radius:20px}
+.side-card{
+  margin-top:auto;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:15px;
+}
+.side-card .ttl{font-size:12px;color:#a9bcd6;font-weight:700}
+.side-card .pp{display:flex;align-items:flex-end;gap:6px;margin:6px 0 10px}
+.side-card .pp b{font-family:"Outfit";font-size:30px;font-weight:800;color:#fff;line-height:1}
+.side-card .pp span{font-size:12px;color:#8fa6c4;padding-bottom:3px}
+.mini-bar{height:7px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+.mini-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),var(--green))}
+.side-card .nxt{font-size:11px;color:#9fb4d0;margin-top:10px}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  height:68px;flex-shrink:0;background:rgba(251,250,248,.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;
+  padding:0 30px;gap:18px;z-index:5;
+}
+.greet b{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:17px}
+.greet p{font-size:12px;color:var(--muted)}
+.search{
+  margin-left:24px;flex:1;max-width:340px;display:flex;align-items:center;gap:9px;
+  background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;color:var(--muted);
+}
+.search input{border:none;outline:none;font-family:inherit;font-size:13.5px;flex:1;background:transparent;color:var(--ink)}
+.topbar .spacer{flex:1}
+.streak-chip{
+  display:flex;align-items:center;gap:7px;background:var(--coral-soft);color:#d3501f;
+  padding:8px 13px;border-radius:11px;font-weight:700;font-size:13px;cursor:default;
+}
+.streak-chip .num{font-family:"Outfit";font-size:15px}
+.icon-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.15s}
+.icon-btn:hover{background:var(--bg-2)}
+.icon-btn .dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--coral);border:2px solid #fff}
+.avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#27B083,#46c79c);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:"Zen Kaku Gothic New";cursor:pointer}
+
+.content{flex:1;overflow-y:auto;padding:30px 36px 60px}
+.view{display:none;animation:fade .4s ease}
+.view.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- Generic ---------- */
+.page-head{margin-bottom:22px}
+.page-head .kick{font-family:"Outfit";font-size:11px;letter-spacing:2px;font-weight:700;color:var(--blue);text-transform:uppercase}
+.page-head h1{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:25px;margin-top:3px;letter-spacing:.3px}
+.page-head p{color:var(--muted);font-size:13.5px;margin-top:4px}
+.grid{display:grid;gap:18px}
+.card{
+  background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);
+  box-shadow:var(--shadow);padding:22px;transition:transform .2s,box-shadow .2s;
+}
+.card.hover:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-h h3{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15.5px;display:flex;align-items:center;gap:9px}
+.card-h .sub{font-size:12px;color:var(--muted)}
+.pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.pill.blue{background:var(--blue-soft);color:#1c63d0}
+.pill.green{background:var(--green-soft);color:#178a64}
+.pill.coral{background:var(--coral-soft);color:#cf5722}
+.pill.gray{background:var(--bg-2);color:var(--muted)}
+.btn{
+  font-family:inherit;font-weight:700;font-size:13.5px;border:none;border-radius:11px;
+  padding:11px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.16s;
+}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:#163a5e;transform:translateY(-1px)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1c6ae8;transform:translateY(-1px)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{background:var(--bg-2)}
+.btn-coral{background:var(--coral);color:#fff}
+.btn-coral:hover{background:#f06a32;transform:translateY(-1px)}
+
+/* ---------- Dashboard ---------- */
+.hero{
+  grid-column:span 8;background:linear-gradient(125deg,#0E2A47 0%,#163a5e 55%,#1d4a74 100%);
+  border-radius:var(--r);padding:28px 30px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow);
+}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,127,249,.4),transparent 70%)}
+.hero::before{content:"";position:absolute;right:90px;bottom:-90px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(39,176,131,.35),transparent 70%)}
+.hero .inner{position:relative;z-index:2}
+.hero h2{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:23px;line-height:1.5}
+.hero h2 em{font-style:normal;color:#7fb2ff}
+.hero p{color:#b9cbe2;font-size:13px;margin-top:8px;max-width:430px}
+.hero-stats{display:flex;gap:30px;margin-top:24px}
+.hero-stats .s b{font-family:"Outfit";font-weight:800;font-size:30px;display:block;line-height:1}
+.hero-stats .s span{font-size:11.5px;color:#9fb4d0}
+.hero-stats .s small{font-family:"Outfit";font-size:13px;color:#7fb2ff;font-weight:600}
+
+.score-card{grid-column:span 4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring{position:relative;width:160px;height:160px;margin:4px 0 8px}
+.ring svg{transform:rotate(-90deg)}
+.ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .ctr b{font-family:"Outfit";font-weight:800;font-size:42px;line-height:1;color:var(--navy)}
+.ring .ctr span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px}
+.score-card .lvl{font-size:12.5px;color:var(--muted)}
+.score-card .lvl b{color:var(--green)}
+
+.stat-row{grid-column:span 12;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.stat{background:#fff;border:1px solid var(--line-2);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);transition:.2s}
+.stat:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.stat .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat b{font-family:"Outfit";font-weight:800;font-size:25px;display:block;line-height:1}
+.stat span{font-size:12px;color:var(--muted)}
+.stat small{font-size:11px;font-weight:700}
+
+.list-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line-2)}
+.list-item:last-child{border-bottom:none}
+.list-item .ava{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-family:"Zen Kaku Gothic New";font-size:15px}
+.list-item .tx{flex:1;min-width:0}
+.list-item .tx b{font-size:13.5px;font-weight:700;display:block}
+.list-item .tx p{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item .tx .meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* heatmap */
+.heat{display:grid;grid-template-columns:repeat(26,1fr);gap:4px;margin-top:6px}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--bg-2);transition:.15s}
+.heat i:hover{transform:scale(1.35);outline:2px solid #fff;box-shadow:var(--shadow)}
+.heat-legend{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:11px;font-size:11px;color:var(--muted)}
+.heat-legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+/* ---------- Passport / Radar ---------- */
+.skill-bar{margin-bottom:15px}
+.skill-bar .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.skill-bar .top b{font-weight:700}
+.skill-bar .top .v{font-family:"Outfit";font-weight:700;color:var(--navy)}
+.track{height:9px;background:var(--bg-2);border-radius:8px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--blue),#5fa0ff);
+  width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.track i.g{background:linear-gradient(90deg,var(--green),#52c79e)}
+
+/* ladder bridge */
+.ladder{display:flex;align-items:flex-end;justify-content:center;gap:6px;height:230px;padding:18px 0 0}
+.lad-col{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}
+.lad-step{width:74px;border-radius:8px 8px 4px 4px;display:flex;align-items:center;justify-content:center;
+  font-family:"Outfit";font-weight:700;font-size:13px;color:#fff;position:relative;transition:.2s}
+.lad-step:hover{transform:translateY(-3px)}
+.bridge{display:flex;flex-direction:column;justify-content:center;gap:30px;height:100%;padding:0 4px}
+.bridge .arr{color:var(--coral);font-size:18px;font-weight:800;font-family:"Outfit"}
+.lad-axis{text-align:center;font-size:12.5px;color:var(--muted);font-weight:700;margin-top:9px}
+.lad-axis b{color:var(--ink)}
+
+/* ---------- Reflection ---------- */
+.log-card{display:flex;gap:16px;padding:18px;border:1px solid var(--line-2);border-radius:14px;margin-bottom:14px;transition:.2s;background:#fff}
+.log-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.log-card .date{flex-shrink:0;text-align:center;width:54px}
+.log-card .date b{font-family:"Outfit";font-weight:800;font-size:22px;color:var(--navy);display:block;line-height:1}
+.log-card .date span{font-size:11px;color:var(--muted)}
+.log-card .body h4{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14.5px;margin-bottom:5px}
+.log-card .body p{font-size:13px;color:#3f4d5e}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.tag{font-size:11px;background:var(--blue-soft);color:#1c63d0;padding:3px 9px;border-radius:7px;font-weight:600}
+.tag.g{background:var(--green-soft);color:#178a64}
+
+/* ---------- Credential ---------- */
+.cert{
+  background:linear-gradient(135deg,#0E2A47,#1d4a74);border-radius:18px;padding:30px;color:#fff;position:relative;overflow:hidden;
+  box-shadow:var(--shadow-lg);
+}
+.cert::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(70% 90% at 100% 0%,rgba(45,127,249,.35),transparent 60%),
+  radial-gradient(60% 80% at 0% 100%,rgba(39,176,131,.3),transparent 60%)}
+.cert .c-in{position:relative;z-index:2}
+.cert .seal{position:absolute;top:24px;right:26px;width:74px;height:74px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-family:"Outfit";font-weight:800;z-index:2}
+.cert .seal b{font-size:24px}.cert .seal span{font-size:8px;letter-spacing:1px}
+.cert .lbl{font-family:"Outfit";letter-spacing:2px;font-size:11px;color:#9fc0eb;font-weight:600}
+.cert h2{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:25px;margin:7px 0 3px}
+.cert .nm{font-size:14px;color:#cfe0f5}
+.cert .row{display:flex;gap:36px;margin-top:26px}
+.cert .row .it span{font-size:10.5px;color:#9fc0eb;display:block}
+.cert .row .it b{font-family:"Outfit";font-weight:700;font-size:15px}
+
+.req{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-2)}
+.req:last-child{border-bottom:none}
+.req .ck{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+.req .ck.done{background:var(--green);color:#fff}
+.req .ck.now{background:var(--coral-soft);color:var(--coral);border:2px solid var(--coral)}
+.req .ck.todo{background:var(--bg-2);color:var(--muted)}
+.req .tx{flex:1}
+.req .tx b{font-size:13.5px;font-weight:700;display:block}
+.req .tx p{font-size:12px;color:var(--muted)}
+
+/* ---------- Scouts ---------- */
+.scout{border:1px solid var(--line-2);border-radius:14px;padding:20px;transition:.2s;background:#fff;cursor:pointer}
+.scout:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:#d8e6ff}
+.scout .top{display:flex;gap:13px;align-items:center;margin-bottom:14px}
+.scout .logo{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:"Zen Kaku Gothic New";font-weight:700;color:#fff;font-size:18px}
+.scout .top b{font-size:14.5px;font-weight:700;display:block}
+.scout .top span{font-size:12px;color:var(--muted)}
+.scout .match{margin-left:auto;text-align:right}
+.scout .match b{font-family:"Outfit";font-weight:800;font-size:22px;color:var(--green);display:block;line-height:1}
+.scout .match span{font-size:10px;color:var(--muted)}
+.scout .msg{font-size:12.5px;color:#3f4d5e;background:var(--bg);border-radius:10px;padding:12px;line-height:1.6}
+.scout .ft{display:flex;gap:8px;margin-top:14px}
+
+/* ---------- Community ---------- */
+.composer{display:flex;gap:13px;align-items:center;background:#fff;border:1px solid var(--line-2);border-radius:14px;padding:14px 18px;cursor:text;box-shadow:var(--shadow)}
+.composer .ph{flex:1;color:var(--muted);font-size:13.5px}
+.post{background:#fff;border:1px solid var(--line-2);border-radius:14px;padding:18px;margin-top:16px;box-shadow:var(--shadow)}
+.post .ph{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.post .ph b{font-size:13.5px;font-weight:700;display:block}
+.post .ph span{font-size:11.5px;color:var(--muted)}
+.post .ph .role{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px}
+.post .tx{font-size:13.5px;color:#2c3a4b;line-height:1.75}
+.post .act{display:flex;gap:22px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line-2);color:var(--muted);font-size:12.5px;font-weight:600}
+.post .act span{display:flex;align-items:center;gap:6px;cursor:pointer;transition:.15s}
+.post .act span:hover{color:var(--blue)}
+.event{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--line-2)}
+.event:last-child{border-bottom:none}
+.event .cal{width:50px;flex-shrink:0;text-align:center;background:var(--coral-soft);border-radius:11px;padding:8px 0}
+.event .cal b{font-family:"Outfit";font-weight:800;font-size:20px;color:var(--coral);display:block;line-height:1}
+.event .cal span{font-size:10px;color:#cf5722;font-weight:700}
+.event .ev b{font-size:13px;font-weight:700;display:block}
+.event .ev p{font-size:11.5px;color:var(--muted)}
+
+/* ---------- Modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(14,42,71,.45);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.overlay.show{display:flex;animation:fade .25s}
+.modal{background:#fff;border-radius:20px;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{transform:scale(.94) translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.modal-h{padding:24px 26px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.modal-h h3{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:19px}
+.modal-h p{font-size:12.5px;color:var(--muted);margin-top:3px}
+.modal-x{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px;color:var(--muted);flex-shrink:0}
+.modal-x:hover{background:var(--bg-2)}
+.modal-b{padding:20px 26px 26px}
+.field{margin-bottom:16px}
+.field label{font-size:12.5px;font-weight:700;display:block;margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;font-family:inherit;font-size:13.5px;border:1px solid var(--line);
+  border-radius:11px;padding:12px 14px;outline:none;background:var(--bg);transition:.15s;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px var(--blue-soft)}
+.chip-pick{display:flex;flex-wrap:wrap;gap:8px}
+.chip-pick label{font-size:12px;padding:7px 13px;border:1px solid var(--line);border-radius:20px;cursor:pointer;transition:.15s;font-weight:500;margin:0}
+.chip-pick input{display:none}
+.chip-pick input:checked + span{}
+.chip-pick label.on{background:var(--blue-soft);border-color:var(--blue);color:#1c63d0;font-weight:700}
+.modal-f{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--navy);color:#fff;padding:14px 22px;border-radius:13px;font-size:13.5px;font-weight:600;
+  box-shadow:var(--shadow-lg);z-index:80;opacity:0;transition:.35s cubic-bezier(.2,.9,.3,1.1);display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast .ic{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px}
+
+.two{display:grid;grid-template-columns:1fr 360px;gap:18px}
+@media(max-width:1180px){.two{grid-template-columns:1fr}.stat-row{grid-template-columns:repeat(2,1fr)}.hero,.score-card{grid-column:span 12}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">CN</div>
+      <div>
+        <div class="name">CareNexus</div>
+        <div class="tag">CAREER PASSPORT</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label">MY CAREER</div>
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        ダッシュボード
+      </div>
+      <div class="nav-item" data-view="passport">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h12l4 4v12a0 0 0 0 1 0 0H4z" stroke-linejoin="round"/><circle cx="12" cy="11" r="3"/><path d="M8 18h8"/></svg>
+        キャリアパスポート
+      </div>
+      <div class="nav-item" data-view="reflection">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" stroke-linejoin="round"/></svg>
+        リフレクションログ
+      </div>
+      <div class="nav-item" data-view="credential">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="9" r="6"/><path d="M8.5 14l-1.5 7 5-3 5 3-1.5-7" stroke-linejoin="round"/></svg>
+        レディネス資格
+      </div>
+      <div class="nav-label">CONNECT</div>
+      <div class="nav-item" data-view="community">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 14c2.8 0 5 2.2 5 5"/></svg>
+        コミュニティ
+      </div>
+      <div class="nav-item" data-view="scouts">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 7l9-4 9 4-9 4z" stroke-linejoin="round"/><path d="M3 7v6l9 4 9-4V7"/></svg>
+        スカウト・求人
+        <span class="nav-badge">3</span>
+      </div>
+    </nav>
+    <div class="side-card">
+      <div class="ttl">在宅レディネス到達度</div>
+      <div class="pp"><b class="num">72</b><span>/ 100</span></div>
+      <div class="mini-bar"><i style="width:72%"></i></div>
+      <div class="nxt">あと <b style="color:#fff">8pt</b> で「レディネス資格 Lv.B」取得 🎉</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="greet">
+        <b id="greet-title">こんにちは、美咲さん 👋</b>
+        <p id="greet-sub">今日も「在宅への一歩」を記録しましょう</p>
+      </div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input placeholder="スキル・ケース・メンターを検索">
+      </div>
+      <div class="spacer"></div>
+      <div class="streak-chip">🔥 <span class="num">28</span>日連続</div>
+      <div class="icon-btn"><span class="dot"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#334" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
+      <div class="avatar">美</div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===================== DASHBOARD ===================== -->
+      <section class="view show" id="view-dashboard">
+        <div class="grid" style="grid-template-columns:repeat(12,1fr)">
+          <div class="hero">
+            <div class="inner">
+              <div class="pill coral" style="background:rgba(255,122,69,.2);color:#ffc7ab">病棟7年目 → 訪問看護へ</div>
+              <h2 style="margin-top:14px">あなたの病棟経験は、<br>在宅で <em>必ず活きる。</em></h2>
+              <p>急性期内科で培った観察力・急変対応は、在宅医療で最も求められる力です。今日の積み重ねが、あなたの市場価値を証明します。</p>
+              <div class="hero-stats">
+                <div class="s"><b class="num">72</b><span>レディネススコア</span><small>▲ +6 今月</small></div>
+                <div class="s"><b class="num">28</b><span>連続記録（日）</span><small>自己ベスト更新中</small></div>
+                <div class="s"><b class="num">3</b><span>新着スカウト</span><small>未読あり</small></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card score-card">
+            <div class="card-h" style="width:100%"><h3>在宅レディネス</h3><span class="pill green">Lv.A→B</span></div>
+            <div class="ring">
+              <svg width="160" height="160">
+                <circle cx="80" cy="80" r="68" stroke="#EDEAE3" stroke-width="14" fill="none"/>
+                <circle id="ring-fg" cx="80" cy="80" r="68" stroke="url(#g1)" stroke-width="14" fill="none" stroke-linecap="round"
+                  stroke-dasharray="427" stroke-dashoffset="427"/>
+                <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2D7FF9"/><stop offset="1" stop-color="#27B083"/></linearGradient></defs>
+              </svg>
+              <div class="ctr"><b class="num">72</b><span>SCORE</span></div>
+            </div>
+            <div class="lvl">目標まで <b>あと8pt</b> ・ 推定到達 <b>2週間</b></div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat">
+              <div class="ic" style="background:var(--blue-soft)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D7FF9" stroke-width="2"><path d="M3 17l5-5 4 4 8-8"/><path d="M14 8h6v6"/></svg></div>
+              <b class="num">+6.2</b><span>今月のスコア上昇 <small style="color:var(--green)">▲</small></span>
+            </div>
+            <div class="stat">
+              <div class="ic" style="background:var(--coral-soft)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2"><path d="M12 2s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3"/></svg></div>
+              <b class="num">42</b><span>累計リフレクション</span>
+            </div>
+            <div class="stat">
+              <div class="ic" style="background:var(--green-soft)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27B083" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <b class="num">14<small style="font-size:14px">/18</small></b><span>資格要件クリア</span>
+            </div>
+            <div class="stat">
+              <div class="ic" style="background:#F1ECFB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7B5BD6" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+              <b class="num">2</b><span>メンター接続中</span>
+            </div>
+          </div>
+
+          <!-- left col -->
+          <div style="grid-column:span 8">
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h">
+                <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF7A45" stroke-width="2"><path d="M12 2s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3"/></svg> 学習ストリーク <span class="sub">直近6ヶ月のリフレクション記録</span></h3>
+                <span class="pill coral">🔥 28日連続</span>
+              </div>
+              <div class="heat" id="heat"></div>
+              <div class="heat-legend">少 <i style="background:#EDEAE3"></i><i style="background:#cfe6da"></i><i style="background:#88d3b4"></i><i style="background:#27B083"></i><i style="background:#178a64"></i> 多</div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>📌 今日のおすすめアクション</h3></div>
+              <div class="list-item">
+                <div class="ava" style="background:var(--coral)">✍️</div>
+                <div class="tx"><b>本日のリフレクションを記録（+2pt）</b><p>連続記録を維持して、評価エンジンのデータを厚くしましょう</p></div>
+                <button class="btn btn-coral" onclick="openLog()">記録する</button>
+              </div>
+              <div class="list-item">
+                <div class="ava" style="background:var(--blue)">🎓</div>
+                <div class="tx"><b>「在宅での褥瘡管理」知識テスト（残り2問でLayer1完了）</b><p>あと2問でリフレクションログ層の要件が満たされます</p></div>
+                <button class="btn btn-ghost">続ける</button>
+              </div>
+              <div class="list-item">
+                <div class="ava" style="background:var(--green)">💬</div>
+                <div class="tx"><b>メンター 佐藤さんから返信があります</b><p>「急変時アセスメントの振り返り、とても良いですね…」</p></div>
+                <button class="btn btn-ghost" onclick="go('community')">見る</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- right col -->
+          <div style="grid-column:span 4">
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h"><h3>🗓 次の予定</h3></div>
+              <div class="event">
+                <div class="cal"><b class="num">12</b><span>6月</span></div>
+                <div class="ev"><b>佐藤メンターとの月次1on1</b><p>20:00〜 / オンライン</p></div>
+              </div>
+              <div class="event">
+                <div class="cal" style="background:var(--blue-soft)"><b class="num" style="color:var(--blue)">18</b><span style="color:#1c63d0">6月</span></div>
+                <div class="ev"><b>トップランナー登壇イベント</b><p>「在宅看取りのリアル」/ 19:00〜</p></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>🤝 仲間の動き</h3></div>
+              <div class="list-item"><div class="ava" style="background:#7B5BD6">健</div><div class="tx"><b>健一さん</b><p>レディネス Lv.B を取得しました 🎉</p></div></div>
+              <div class="list-item"><div class="ava" style="background:#E0A93B">彩</div><div class="tx"><b>彩さん</b><p>30日連続記録を達成</p></div></div>
+              <div class="list-item"><div class="ava" style="background:var(--green)">直</div><div class="tx"><b>直樹さん</b><p>あおぞら訪問看護からスカウト受領</p></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PASSPORT ===================== -->
+      <section class="view" id="view-passport">
+        <div class="page-head">
+          <div class="kick">Career Passport</div>
+          <h1>キャリアパスポート</h1>
+          <p>あなたの病棟経験を、在宅医療のスキルへ「自動翻訳」して可視化します</p>
+        </div>
+        <div class="two">
+          <div>
+            <div class="card hover" style="margin-bottom:18px">
+              <div class="card-h"><h3>スキル翻訳マップ</h3><span class="pill blue">病棟経験 → 在宅換算</span></div>
+              <div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">
+                <div style="flex-shrink:0">
+                  <svg width="240" height="240" viewBox="0 0 240 240" id="radar"></svg>
+                </div>
+                <div style="flex:1;min-width:200px">
+                  <div class="skill-bar"><div class="top"><b>フィジカルアセスメント</b><span class="v">88</span></div><div class="track"><i data-w="88"></i></div></div>
+                  <div class="skill-bar"><div class="top"><b>急変・リスク予測</b><span class="v">82</span></div><div class="track"><i data-w="82"></i></div></div>
+                  <div class="skill-bar"><div class="top"><b>多職種連携</b><span class="v">64</span></div><div class="track"><i class="g" data-w="64"></i></div></div>
+                  <div class="skill-bar"><div class="top"><b>在宅特有ケア（褥瘡/排泄）</b><span class="v">58</span></div><div class="track"><i class="g" data-w="58"></i></div></div>
+                  <div class="skill-bar"><div class="top"><b>意思決定支援・ACP</b><span class="v">61</span></div><div class="track"><i class="g" data-w="61"></i></div></div>
+                  <div class="skill-bar"><div class="top"><b>生活・家族支援視点</b><span class="v">52</span></div><div class="track"><i class="g" data-w="52"></i></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="card hover">
+              <div class="card-h"><h3>病棟 ⇄ 在宅 ラダー連携</h3><span class="sub">クリニカルラダーと訪問看護ラダーをシームレスに接続</span></div>
+              <div class="ladder">
+                <div class="lad-col">
+                  <div class="lad-step" style="height:60px;background:#9db8d6">Lv.1</div>
+                  <div class="lad-step" style="height:92px;background:#5f8fc4">Lv.2</div>
+                  <div class="lad-step" style="height:128px;background:#2D7FF9">Lv.3</div>
+                  <div class="lad-axis"><b>病棟</b>（現在地）</div>
+                </div>
+                <div class="bridge">
+                  <div class="arr">›››</div><div class="arr">›››</div><div class="arr">›››</div>
+                </div>
+                <div class="lad-col">
+                  <div class="lad-step" style="height:52px;background:#9bd9c1">Lv.A</div>
+                  <div class="lad-step" style="height:86px;background:#52c79e;border:2px dashed #fff;box-shadow:0 0 0 2px var(--coral)">Lv.B</div>
+                  <div class="lad-step" style="height:120px;background:#cfe9df;color:#178a64">Lv.C</div>
+                  <div class="lad-axis"><b>訪問看護</b>（目標）</div>
+                </div>
+              </div>
+              <div style="text-align:center;margin-top:8px;font-size:12.5px;color:var(--muted)">あなたの病棟<b style="color:var(--navy)">Lv.3</b>は、在宅<b style="color:var(--green)">Lv.B相当</b>に換算されています</div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h"><h3>市場価値スコア</h3></div>
+              <div style="text-align:center;padding:8px 0 4px">
+                <div class="num" style="font-size:46px;font-weight:800;color:var(--navy);line-height:1">A−</div>
+                <div style="font-size:12px;color:var(--muted)">在宅移行レディネス総合評価</div>
+              </div>
+              <div style="margin-top:16px;font-size:12.5px;color:#3f4d5e;background:var(--bg);border-radius:11px;padding:14px;line-height:1.7">
+                <b style="color:var(--navy)">AIによる評価コメント：</b><br>急性期での観察力が突出。在宅特有の生活・家族支援視点を補えば、即戦力として高評価が期待できます。
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>My Will（志）</h3><span class="pill coral">編集</span></div>
+              <p style="font-size:13px;color:#3f4d5e;line-height:1.8;font-style:italic;border-left:3px solid var(--coral);padding-left:14px">
+                「患者さんが住み慣れた家で、最期まで自分らしく過ごせるよう支えたい。病棟で見送るたびに、もっと早く生活に寄り添えたらと感じてきました。」
+              </p>
+              <div style="margin-top:14px;font-size:12px;color:var(--muted)">この志を起点に、あなた専用のキャリアラダーが設計されています。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== REFLECTION ===================== -->
+      <section class="view" id="view-reflection">
+        <div class="page-head">
+          <div class="kick">Reflection Log</div>
+          <h1>リフレクションログ</h1>
+          <p>日々の気づきが、あなたの市場価値を証明するデータ資産になります</p>
+        </div>
+        <div class="two">
+          <div>
+            <div class="card" style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:18px">
+              <div>
+                <div style="font-family:'Zen Kaku Gothic New';font-weight:700;font-size:15px">今日のリフレクションはまだ未記録です</div>
+                <div style="font-size:12.5px;color:var(--muted);margin-top:3px">2分の入力で連続記録を更新 ＆ +2pt 獲得</div>
+              </div>
+              <button class="btn btn-coral" onclick="openLog()">＋ 記録する</button>
+            </div>
+            <div id="log-list">
+              <div class="log-card">
+                <div class="date"><b class="num">06</b><span>6月 火</span></div>
+                <div class="body">
+                  <h4>急変時のアセスメント判断を振り返って</h4>
+                  <p>夜勤帯で患者の SpO2 低下に気づき、早期にドクターコール。バイタルの推移を時系列で捉える力が在宅でも独居患者の異変察知に直結すると実感した。</p>
+                  <div class="tagrow"><span class="tag">急変対応</span><span class="tag g">在宅換算: 観察力↑</span><span class="tag">フィジカルアセスメント</span></div>
+                </div>
+              </div>
+              <div class="log-card">
+                <div class="date"><b class="num">05</b><span>6月 月</span></div>
+                <div class="body">
+                  <h4>退院支援カンファで在宅チームと連携</h4>
+                  <p>訪問看護師・ケアマネと情報共有。病院視点と在宅視点のギャップを体感。「生活がどう続くか」を見据える視点を意識して記録した。</p>
+                  <div class="tagrow"><span class="tag">多職種連携</span><span class="tag g">在宅換算: 連携力↑</span></div>
+                </div>
+              </div>
+              <div class="log-card">
+                <div class="date"><b class="num">04</b><span>6月 日</span></div>
+                <div class="body">
+                  <h4>褥瘡ケアの知識テストに挑戦</h4>
+                  <p>在宅での体位変換・栄養管理の重要性を学習。病棟との環境差（介護者の存在）を踏まえたケア設計の必要性を理解した。</p>
+                  <div class="tagrow"><span class="tag">スキンケア</span><span class="tag">知識テスト 90点</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h"><h3>記録カレンダー</h3></div>
+              <div class="heat" id="heat2" style="grid-template-columns:repeat(13,1fr)"></div>
+              <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:12.5px">
+                <div><b class="num" style="font-size:20px;color:var(--coral)">28</b><br><span style="color:var(--muted)">連続日数</span></div>
+                <div><b class="num" style="font-size:20px;color:var(--navy)">42</b><br><span style="color:var(--muted)">累計記録</span></div>
+                <div><b class="num" style="font-size:20px;color:var(--green)">+84</b><br><span style="color:var(--muted)">獲得pt</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>よく使うタグ</h3></div>
+              <div class="tagrow">
+                <span class="tag">急変対応</span><span class="tag g">在宅換算</span><span class="tag">多職種連携</span>
+                <span class="tag">フィジカルアセスメント</span><span class="tag g">家族支援</span><span class="tag">スキンケア</span><span class="tag">ACP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CREDENTIAL ===================== -->
+      <section class="view" id="view-credential">
+        <div class="page-head">
+          <div class="kick">Readiness Credential</div>
+          <h1>訪問看護レディネス資格</h1>
+          <p>3層評価で、組織ラダーとは次元の違う客観性をあなたに</p>
+        </div>
+        <div class="two">
+          <div>
+            <div class="cert" style="margin-bottom:18px">
+              <div class="seal"><b class="num">B</b><span>READY</span></div>
+              <div class="c-in">
+                <div class="lbl">VISITING NURSE READINESS</div>
+                <h2>訪問看護レディネス資格</h2>
+                <div class="nm">田中 美咲 ・ 急性期内科病棟 7年目</div>
+                <div class="row">
+                  <div class="it"><span>現在の到達Lv.</span><b class="num">Lv.A → B（申請可能まであと8pt）</b></div>
+                  <div class="it"><span>証明書ID</span><b class="num">CN-2026-0042</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>資格取得の3層評価</h3><span class="pill green">14 / 18 要件クリア</span></div>
+
+              <div style="margin:6px 0 4px"><span class="pill blue">Layer 1 ・ リフレクションログ（自己記録）</span></div>
+              <div class="req"><div class="ck done">✓</div><div class="tx"><b>30件以上のリフレクション投稿</b><p>42件完了</p></div></div>
+              <div class="req"><div class="ck done">✓</div><div class="tx"><b>基礎知識テスト 全6カテゴリ合格</b><p>平均88点</p></div></div>
+              <div class="req"><div class="ck now">●</div><div class="tx"><b>在宅特有ケア知識テスト</b><p>残り2問で完了</p></div></div>
+
+              <div style="margin:14px 0 4px"><span class="pill blue">Layer 2 ・ 次世代型評価エンジン（自動算定）</span></div>
+              <div class="req"><div class="ck done">✓</div><div class="tx"><b>実施ケア・手技のチェックリスト入力</b><p>急性期領域 完了</p></div></div>
+              <div class="req"><div class="ck now">●</div><div class="tx"><b>在宅換算スコア 65pt 到達</b><p>現在58pt（あと7pt）</p></div></div>
+
+              <div style="margin:14px 0 4px"><span class="pill blue">Layer 3 ・ メンター評価（最終保証）</span></div>
+              <div class="req"><div class="ck done">✓</div><div class="tx"><b>メンターによる中間レビュー</b><p>佐藤メンター承認済み</p></div></div>
+              <div class="req"><div class="ck todo">○</div><div class="tx"><b>トップランナーによる最終レビュー</b><p>Layer1・2完了後に申請可能</p></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h"><h3>取得までの道のり</h3></div>
+              <div style="position:relative;padding-left:6px">
+                <div class="list-item"><div class="ava" style="background:var(--green)">✓</div><div class="tx"><b>Lv.A 取得</b><p>2026年4月 取得済み</p></div></div>
+                <div class="list-item"><div class="ava" style="background:var(--coral)">▶</div><div class="tx"><b style="color:var(--coral)">Lv.B 申請（あと8pt）</b><p>在宅換算スコアの到達がカギ</p></div></div>
+                <div class="list-item"><div class="ava" style="background:var(--bg-2);color:var(--muted)">C</div><div class="tx"><b>Lv.C（即戦力認定）</b><p>スカウト優先度が最上位に</p></div></div>
+              </div>
+              <button class="btn btn-blue" style="width:100%;justify-content:center;margin-top:8px" onclick="toast('Lv.B 申請の準備を保存しました')">Lv.B 取得を目指す</button>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>資格のメリット</h3></div>
+              <div style="font-size:13px;color:#3f4d5e;line-height:1.9">
+                ✓ ステーションからの<b>スカウト優先度UP</b><br>
+                ✓ 熱量・スキルが<b>客観的に証明済み</b>に<br>
+                ✓ 入職後の<b>ミスマッチ・孤立を防止</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== COMMUNITY ===================== -->
+      <section class="view" id="view-community">
+        <div class="page-head">
+          <div class="kick">Community</div>
+          <h1>コミュニティ</h1>
+          <p>同じ志を持つ仲間と、トップランナーのメンターと繋がる</p>
+        </div>
+        <div class="two">
+          <div>
+            <div class="composer" onclick="toast('投稿機能はデモです')">
+              <div class="avatar" style="width:42px;height:42px">美</div>
+              <div class="ph">今日の気づきや質問をシェアしましょう…</div>
+              <button class="btn btn-blue">投稿</button>
+            </div>
+            <div class="post">
+              <div class="ph">
+                <div class="avatar" style="width:44px;height:44px;background:linear-gradient(140deg,#2D7FF9,#5fa0ff)">佐</div>
+                <div><b>佐藤 健太郎</b><span class="role" style="background:var(--coral-soft);color:#cf5722">メンター</span><br><span>あおぞら訪問看護ステーション 管理者 ・ 2時間前</span></div>
+              </div>
+              <div class="tx">病棟出身の方へ。在宅で一番活きるのは「先を読む力」です。急変を未然に防いだ経験こそ、独居の利用者さんを守る最大の武器になります。自信を持ってください。今夜の登壇イベントでも詳しくお話しします🏠</div>
+              <div class="act"><span>♡ 64 いいね</span><span>💬 12 返信</span><span>🔖 保存</span></div>
+            </div>
+            <div class="post">
+              <div class="ph">
+                <div class="avatar" style="width:44px;height:44px;background:#7B5BD6">健</div>
+                <div><b>山田 健一</b><span class="role" style="background:var(--blue-soft);color:#1c63d0">病棟看護師</span><br><span>外科病棟 5年目 ・ 5時間前</span></div>
+              </div>
+              <div class="tx">ついにレディネス Lv.B 取得しました！半年前は「自分の経験なんて在宅で通用するの？」と不安でしたが、ログを続けるうちに自分の強みが言語化できました。みんなありがとう🎉</div>
+              <div class="act"><span>♡ 128 いいね</span><span>💬 31 返信</span><span>🔖 保存</span></div>
+            </div>
+            <div class="post">
+              <div class="ph">
+                <div class="avatar" style="width:44px;height:44px;background:var(--green)">彩</div>
+                <div><b>鈴木 彩</b><span class="role" style="background:var(--blue-soft);color:#1c63d0">病棟看護師</span><br><span>ICU 8年目 ・ 昨日</span></div>
+              </div>
+              <div class="tx">質問です。ICUでの全身管理の経験は在宅でどう活きますか？人工呼吸器の在宅移行ケースに興味があります。経験のある方、ぜひお話聞かせてください🙏</div>
+              <div class="act"><span>♡ 41 いいね</span><span>💬 18 返信</span><span>🔖 保存</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:18px">
+              <div class="card-h"><h3>🗓 開催予定イベント</h3></div>
+              <div class="event"><div class="cal"><b class="num">18</b><span>6月</span></div><div class="ev"><b>在宅看取りのリアル</b><p>佐藤メンター登壇 / 19:00〜</p></div></div>
+              <div class="event"><div class="cal" style="background:var(--blue-soft)"><b class="num" style="color:var(--blue)">25</b><span style="color:#1c63d0">6月</span></div><div class="ev"><b>病棟経験の棚卸しワーク</b><p>少人数ピアセッション</p></div></div>
+              <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px">すべて見る</button>
+            </div>
+            <div class="card">
+              <div class="card-h"><h3>🌟 おすすめメンター</h3></div>
+              <div class="list-item"><div class="ava" style="background:var(--blue)">佐</div><div class="tx"><b>佐藤 健太郎</b><p>在宅看取り・急変対応</p></div><button class="btn btn-ghost" style="padding:7px 12px">接続済</button></div>
+              <div class="list-item"><div class="ava" style="background:var(--coral)">田</div><div class="tx"><b>田村 さくら</b><p>小児在宅・医療的ケア児</p></div><button class="btn btn-blue" style="padding:7px 12px" onclick="toast('接続申請を送信しました')">＋接続</button></div>
+              <div class="list-item"><div class="ava" style="background:var(--green)">大</div><div class="tx"><b>大野 拓海</b><p>精神科訪問看護</p></div><button class="btn btn-blue" style="padding:7px 12px" onclick="toast('接続申請を送信しました')">＋接続</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== SCOUTS ===================== -->
+      <section class="view" id="view-scouts">
+        <div class="page-head">
+          <div class="kick">Scouts & Jobs</div>
+          <h1>スカウト・求人</h1>
+          <p>あなたの「証明済みの熱量とスキル」に、ステーションからオファーが届いています</p>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="scout" onclick="openScout('あおぞら訪問看護ステーション','緑区 / 機能強化型','#2D7FF9','あ',96,'田中さんの急変対応のリフレクション、まさに当ステーションが求める力です。Lv.Bを取得されたらぜひ一度お話しさせてください。教育体制も整っています。')">
+            <div class="top">
+              <div class="logo" style="background:var(--blue)">あ</div>
+              <div><b>あおぞら訪問看護ステーション</b><span>緑区 / 機能強化型 / 看取り対応</span></div>
+              <div class="match"><b class="num">96%</b><span>マッチ度</span></div>
+            </div>
+            <div class="msg">田中さんの急変対応のリフレクション、まさに当ステーションが求める力です。Lv.Bを取得されたら…</div>
+            <div class="ft"><span class="pill green">看取り強化</span><span class="pill blue">教育充実</span><span class="pill gray">想定年収 520〜600万</span></div>
+          </div>
+          <div class="scout" onclick="openScout('みらいケア訪問看護','港北区 / 24時間対応','#27B083','み',91,'急性期での観察力を在宅で活かしませんか。私たちは病棟出身者の受け入れ実績が豊富で、3ヶ月の同行研修で安心して移行できます。')">
+            <div class="top">
+              <div class="logo" style="background:var(--green)">み</div>
+              <div><b>みらいケア訪問看護</b><span>港北区 / 24時間対応</span></div>
+              <div class="match"><b class="num">91%</b><span>マッチ度</span></div>
+            </div>
+            <div class="msg">急性期での観察力を在宅で活かしませんか。病棟出身者の受け入れ実績が豊富で、3ヶ月の同行研修で…</div>
+            <div class="ft"><span class="pill blue">同行研修3ヶ月</span><span class="pill gray">想定年収 480〜560万</span></div>
+          </div>
+          <div class="scout" onclick="openScout('ひだまり在宅看護','西区 / 小児・成人','#FF7A45','ひ',84,'リフレクションから伝わる利用者さん本位の姿勢に共感しました。家族支援に力を入れたい方を歓迎します。')">
+            <div class="top">
+              <div class="logo" style="background:var(--coral)">ひ</div>
+              <div><b>ひだまり在宅看護</b><span>西区 / 小児・成人</span></div>
+              <div class="match"><b class="num">84%</b><span>マッチ度</span></div>
+            </div>
+            <div class="msg">リフレクションから伝わる利用者さん本位の姿勢に共感しました。家族支援に力を入れたい方を…</div>
+            <div class="ft"><span class="pill coral">家族支援重視</span><span class="pill gray">想定年収 460〜540万</span></div>
+          </div>
+          <div class="scout" style="border-style:dashed;background:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;cursor:default">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--navy)">Lv.B 取得で<br>スカウトがさらに増えます</div>
+              <div style="font-size:12px;color:var(--muted);margin:8px 0 12px">即戦力認定ユーザーには平均2.4倍のオファー</div>
+              <button class="btn btn-coral" onclick="go('credential')">資格取得を進める</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: LOG ============ -->
+<div class="overlay" id="modal-log">
+  <div class="modal">
+    <div class="modal-h">
+      <div><h3>今日のリフレクション</h3><p>2分の振り返りが、あなたの市場価値を証明します</p></div>
+      <button class="modal-x" onclick="closeModal('modal-log')">×</button>
+    </div>
+    <div class="modal-b">
+      <div class="field"><label>タイトル</label><input id="log-title" placeholder="例：急変時のアセスメント判断を振り返って"></div>
+      <div class="field"><label>気づき・学び</label><textarea id="log-body" rows="4" placeholder="今日の業務で印象に残った場面、そこから得た学びを記録しましょう。"></textarea></div>
+      <div class="field">
+        <label>タグ（病棟経験を在宅に翻訳）</label>
+        <div class="chip-pick" id="chips">
+          <label><input type="checkbox">急変対応</label>
+          <label><input type="checkbox">フィジカルアセスメント</label>
+          <label><input type="checkbox">多職種連携</label>
+          <label><input type="checkbox">家族支援</label>
+          <label><input type="checkbox">スキンケア</label>
+          <label><input type="checkbox">ACP・意思決定支援</label>
+        </div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-ghost" onclick="closeModal('modal-log')">キャンセル</button>
+        <button class="btn btn-coral" onclick="submitLog()">記録する（+2pt）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: SCOUT ============ -->
+<div class="overlay" id="modal-scout">
+  <div class="modal">
+    <div class="modal-h">
+      <div style="display:flex;gap:13px;align-items:center">
+        <div class="logo" id="sc-logo" style="width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Zen Kaku Gothic New';font-weight:700;font-size:20px"></div>
+        <div><h3 id="sc-name"></h3><p id="sc-sub"></p></div>
+      </div>
+      <button class="modal-x" onclick="closeModal('modal-scout')">×</button>
+    </div>
+    <div class="modal-b">
+      <div style="display:flex;gap:24px;margin-bottom:18px">
+        <div><div class="num" id="sc-match" style="font-size:30px;font-weight:800;color:var(--green);line-height:1"></div><span style="font-size:11px;color:var(--muted)">マッチ度</span></div>
+        <div><div class="num" style="font-size:30px;font-weight:800;color:var(--navy);line-height:1">Lv.B+</div><span style="font-size:11px;color:var(--muted)">推奨資格</span></div>
+        <div><div class="num" style="font-size:30px;font-weight:800;color:var(--navy);line-height:1">3ヶ月</div><span style="font-size:11px;color:var(--muted)">同行研修</span></div>
+      </div>
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:7px">スカウトメッセージ</div>
+      <div style="font-size:13px;color:#3f4d5e;background:var(--bg);border-radius:12px;padding:16px;line-height:1.8" id="sc-msg"></div>
+      <div class="modal-f">
+        <button class="btn btn-ghost" onclick="closeModal('modal-scout')">あとで</button>
+        <button class="btn btn-primary" onclick="closeModal('modal-scout');toast('面談を希望しました。担当者から連絡が届きます')">面談を希望する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="ic">✓</div><span id="toast-msg"></span></div>
+
+<script>
+/* ---------- view routing ---------- */
+const titles = {
+  dashboard:['こんにちは、美咲さん 👋','今日も「在宅への一歩」を記録しましょう'],
+  passport:['キャリアパスポート 🛂','あなたの経験を在宅スキルへ翻訳'],
+  reflection:['リフレクションログ ✍️','今日の気づきを記録しましょう'],
+  credential:['レディネス資格 🎓','あと8ptでLv.B取得'],
+  community:['コミュニティ 🤝','仲間とメンターと繋がる'],
+  scouts:['スカウト・求人 📩','3件の新着オファー']
+};
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('show'));
+  document.getElementById('view-'+v).classList.add('show');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
+  document.getElementById('greet-title').textContent=titles[v][0];
+  document.getElementById('greet-sub').textContent=titles[v][1];
+  document.querySelector('.content').scrollTop=0;
+  if(v==='passport') setTimeout(drawRadar,60);
+  animateBars();
+}
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>go(n.dataset.view)));
+
+/* ---------- score ring ---------- */
+window.addEventListener('load',()=>{
+  const r=68, c=2*Math.PI*r, fg=document.getElementById('ring-fg');
+  fg.style.transition='stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)';
+  setTimeout(()=>{ fg.style.strokeDashoffset = c*(1-0.72); },200);
+  buildHeat('heat',26*7); buildHeat('heat2',13*7);
+  animateBars();
+});
+
+/* ---------- bars ---------- */
+function animateBars(){
+  document.querySelectorAll('.view.show .track i').forEach(i=>{ i.style.width = (i.dataset.w||0)+'%'; });
+}
+
+/* ---------- heatmap ---------- */
+function buildHeat(id,n){
+  const el=document.getElementById(id); el.innerHTML='';
+  const cols=['#EDEAE3','#cfe6da','#88d3b4','#27B083','#178a64'];
+  for(let i=0;i<n;i++){
+    const cell=document.createElement('i');
+    // recent days heavier; create a streak at the end
+    let lv;
+    if(i>n-29) lv = 2+Math.floor(Math.random()*3);            // last 28 days: active streak
+    else lv = Math.random()<0.45?0:Math.floor(Math.random()*5);
+    cell.style.background=cols[lv];
+    el.appendChild(cell);
+  }
+}
+
+/* ---------- radar (passport) ---------- */
+function drawRadar(){
+  const svg=document.getElementById('radar'); if(!svg||svg.dataset.done)return;
+  const cx=120,cy=120,R=88,N=6;
+  const labels=['観察力','急変','連携','在宅ケア','ACP','家族'];
+  const vals=[.88,.82,.64,.58,.61,.52];
+  let g='';
+  // grid rings
+  for(let ring=1;ring<=4;ring++){
+    let pts=[];
+    for(let i=0;i<N;i++){const a=-Math.PI/2+i*2*Math.PI/N;pts.push((cx+Math.cos(a)*R*ring/4)+','+(cy+Math.sin(a)*R*ring/4));}
+    g+=`<polygon points="${pts.join(' ')}" fill="none" stroke="#EDEAE3" stroke-width="1"/>`;
+  }
+  // axes + labels
+  for(let i=0;i<N;i++){
+    const a=-Math.PI/2+i*2*Math.PI/N;
+    const x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
+    g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#EDEAE3" stroke-width="1"/>`;
+    const lx=cx+Math.cos(a)*(R+16), ly=cy+Math.sin(a)*(R+16);
+    g+=`<text x="${lx}" y="${ly+4}" font-size="10.5" fill="#6A7686" text-anchor="middle" font-family="Noto Sans JP">${labels[i]}</text>`;
+  }
+  // data polygon
+  let dp=[];
+  for(let i=0;i<N;i++){const a=-Math.PI/2+i*2*Math.PI/N;dp.push((cx+Math.cos(a)*R*vals[i])+','+(cy+Math.sin(a)*R*vals[i]));}
+  g+=`<polygon points="${dp.join(' ')}" fill="rgba(45,127,249,.18)" stroke="#2D7FF9" stroke-width="2.2"/>`;
+  for(let i=0;i<N;i++){const a=-Math.PI/2+i*2*Math.PI/N;g+=`<circle cx="${cx+Math.cos(a)*R*vals[i]}" cy="${cy+Math.sin(a)*R*vals[i]}" r="3.2" fill="#2D7FF9"/>`;}
+  svg.innerHTML=g; svg.dataset.done=1;
+}
+
+/* ---------- modal ---------- */
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function openLog(){openModal('modal-log')}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+// chip toggle
+document.querySelectorAll('#chips label').forEach(l=>{
+  l.addEventListener('click',()=>setTimeout(()=>l.classList.toggle('on',l.querySelector('input').checked),0));
+});
+function submitLog(){
+  const t=document.getElementById('log-title').value.trim()||'今日のリフレクション';
+  const b=document.getElementById('log-body').value.trim()||'今日の学びを記録しました。';
+  const tags=[...document.querySelectorAll('#chips input:checked')].map(c=>c.parentElement.textContent.trim());
+  const d=new Date();
+  const card=document.createElement('div'); card.className='log-card';
+  card.innerHTML=`<div class="date"><b class="num">${String(d.getDate()).padStart(2,'0')}</b><span>${d.getMonth()+1}月 今日</span></div>
+    <div class="body"><h4>${t}</h4><p>${b}</p><div class="tagrow"><span class="tag g">+2pt 獲得</span>${tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`;
+  const list=document.getElementById('log-list'); list.insertBefore(card,list.firstChild);
+  card.style.opacity=0;card.style.transform='translateY(-8px)';
+  setTimeout(()=>{card.style.transition='.4s';card.style.opacity=1;card.style.transform='none'},20);
+  // reset
+  document.getElementById('log-title').value='';document.getElementById('log-body').value='';
+  document.querySelectorAll('#chips label').forEach(l=>{l.classList.remove('on');l.querySelector('input').checked=false});
+  closeModal('modal-log'); toast('リフレクションを記録しました（+2pt）🔥 29日連続！');
+}
+
+/* ---------- scout ---------- */
+function openScout(name,sub,color,initial,match,msg){
+  document.getElementById('sc-name').textContent=name;
+  document.getElementById('sc-sub').textContent=sub;
+  document.getElementById('sc-match').textContent=match+'%';
+  document.getElementById('sc-msg').textContent=msg;
+  const lg=document.getElementById('sc-logo'); lg.style.background=color; lg.textContent=initial;
+  openModal('modal-scout');
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show'); clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
